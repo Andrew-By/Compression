@@ -42,27 +42,23 @@ namespace Compression
             List<byte> Compressed = new List<byte>();
             using (MemoryStream mStream = new MemoryStream())
             {
-                using (BitStream stream = new BitStream(mStream))
+                StringBuilder buffer = new StringBuilder();
+                foreach (var b in _rawData)
                 {
-                    StringBuilder buffer = new StringBuilder();
-                    foreach (var b in _rawData)
-                    {
-                        var code = codes[b];
-                        buffer.Append(code);
-                        //stream.WriteBits(BitConverter.GetBytes(Convert.ToUInt32(code, 2)), 0, (ulong)code.Length);
-                    }
-                    string sBuffer = buffer.ToString();
-                    int bytesLength = (sBuffer.Length % 8 == 0) ? sBuffer.Length / 8 : sBuffer.Length / 8 + 1;
-
-                    for (int i = 0; i < bytesLength * 8; i += 8)
-                    {
-                        string cache = (sBuffer.Length >= i + 8) ? sBuffer.Substring(i, 8) : sBuffer.Substring(i);
-                        if (cache.Length < 8)
-                            cache = cache.PadRight(8, '0');
-                        mStream.WriteByte(Convert.ToByte(cache, 2));
-                    }
-                    _archive = new Archive(codes, (uint)_rawData.Count(), mStream.ToArray());
+                    var code = codes[b];
+                    buffer.Append(code);
                 }
+                string sBuffer = buffer.ToString();
+                int bytesLength = (sBuffer.Length % 8 == 0) ? sBuffer.Length / 8 : sBuffer.Length / 8 + 1;
+
+                for (int i = 0; i < bytesLength * 8; i += 8)
+                {
+                    string cache = (sBuffer.Length >= i + 8) ? sBuffer.Substring(i, 8) : sBuffer.Substring(i);
+                    if (cache.Length < 8)
+                        cache = cache.PadRight(8, '0');
+                    mStream.WriteByte(Convert.ToByte(cache, 2));
+                }
+                _archive = new Archive(codes, (uint)_rawData.Count(), mStream.ToArray());
             }
         }
 
@@ -145,8 +141,6 @@ namespace Compression
         {
             using (FileStream file = File.Create(fileName))
             {
-                //IFormatter formatter = new BinaryFormatter();
-                //formatter.Serialize(file, _archive);
                 byte[] bytes = _archive.GetBytes();
                 file.Write(bytes, 0, bytes.Count());
             }
