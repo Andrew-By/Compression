@@ -23,19 +23,21 @@
         <StackPanel Grid.Row="1" Orientation="Horizontal">
             <Button Name="AnalyzeButton" Width="150" Height="30" Content="Анализировать текст" Margin="5" Click="AnalyzeButton_Click" />
             <Button Name="FileButton" Width="150" Height="30" Content="Записать текст" Margin="5" Click="FileButton_Click" />
+            <Button Name="ReadFileButton" Width="150" Height="30" Content="Прочитать текст" Margin="5" Click="ReadFileButton_Click" />
         </StackPanel>
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="17*" />
+                <ColumnDefinition Width="44*"/>
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <DataGrid Name="FrequencyDataGrid" ItemsSource="{Binding Bytes}" Grid.RowSpan="2" />
-            <ComboBox Name="CharsetComboBox" Grid.Column="1">
+            <DataGrid Name="FrequencyDataGrid" ItemsSource="{Binding Stats.Bytes}" Grid.RowSpan="2" />
+            <ComboBox Name="CharsetComboBox" Grid.Column="1" Grid.ColumnSpan="2">
                 <ComboBox.Items>
                     <ComboBoxItem Selector.IsSelected="True">(Не определено)</ComboBoxItem>
                     <ComboBoxItem>KOI8-R</ComboBoxItem>
@@ -44,8 +46,8 @@
                     <ComboBoxItem>Windows-1251</ComboBoxItem>
                 </ComboBox.Items>
             </ComboBox>
-            <Button Name="ConvertButton" Grid.Column="2" Click="ConvertButton_Click">Преобразовать</Button>
-            <ScrollViewer Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1">
+            <Button Name="ConvertButton" Grid.Column="3" Click="ConvertButton_Click">Преобразовать</Button>
+            <ScrollViewer Grid.Column="1" Grid.ColumnSpan="3" Grid.Row="1">
                 <TextBox Name="FileContentsTextBox" />
             </ScrollViewer>
         </Grid>

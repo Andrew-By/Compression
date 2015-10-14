@@ -24,13 +24,12 @@ namespace Compression
     /// </summary>
     public partial class MainWindow : Window
     {
-        public ByteStats Stats = new ByteStats();
-        public Byte[] FileContents;
+        public Archiver Arc = new Archiver();
 
         public MainWindow()
         {
             InitializeComponent();
-            this.DataContext = Stats;
+            this.DataContext = Arc;
         }
 
         private void BrowseButton_Click(object sender, RoutedEventArgs e)
@@ -43,59 +42,27 @@ namespace Compression
             }
         }
 
-        private void Process_text()
-        {
-            Stats.Clear();
-            FileContents = File.ReadAllBytes(FilePathTextBox.Text);
-            foreach (var b in FileContents)
-                Stats.Add(b);
-            Stats.UpdateFrequency();
-            Stats.Span();
-        }
-
         private void AnalyzeButton_Click(object sender, RoutedEventArgs e)
         {
-            Process_text();
-
-            FileContentsTextBox.Text = Encoding.UTF8.GetString(FileContents);
+            string text = File.ReadAllText(FilePathTextBox.Text);
+            Arc.LoadText(text);
+            FileContentsTextBox.Text = text;
         }
 
         private void ConvertButton_Click(object sender, RoutedEventArgs e)
         {
-            String text = String.Empty;
-            switch (CharsetComboBox.SelectedIndex)
-            {
-                case 1:
-                    text = Encoding.GetEncoding("KOI8-R").GetString(FileContents);
-                    break;
-                case 2:
-                    text = Encoding.GetEncoding("iso-8859-5").GetString(FileContents);
-                    break;
-                case 3:
-                    text = Encoding.GetEncoding(866).GetString(FileContents);
-                    break;
-                case 4:
-                    text = Encoding.GetEncoding("windows-1251").GetString(FileContents);
-                    break;
-                default:
-                    Encoding.UTF8.GetString(FileContents);
-                    break;
-            }
-
-            FileContentsTextBox.Text = text;
         }
 
         private void FileButton_Click(object sender, RoutedEventArgs e)
         {
-            var codes = from s in Stats.Bytes select new ByteCode(s.Byte, s.Code);
-            Archieve arc = new Archieve(codes.ToList());
+            Arc.Compress();
+            Arc.WriteToFile(FilePathTextBox.Text + ".wsa");
+        }
 
-            using (FileStream stream = File.Create(@"C:\Users\andre\data"))
-            {
-                IFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(stream, arc);
-                FileContentsTextBox.Text = stream.Length.ToString();
-            }
+        private void ReadFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            Arc.ReadFromFile(FilePathTextBox.Text);
+            Arc.Decompress();
         }
     }
 }
