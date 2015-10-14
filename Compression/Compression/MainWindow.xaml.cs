@@ -39,6 +39,8 @@ namespace Compression
             if (result == true)
             {
                 FilePathTextBox.Text = dialog.FileName;
+                Arc.Stats.Clear();
+                FileContentsTextBox.Clear();
             }
         }
 

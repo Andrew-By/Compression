@@ -68,8 +68,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Archiver.cs" />
-    <Compile Include="BitNum.cs" />
-    <Compile Include="BitStream.cs" />
     <Compile Include="Models\Archive.cs" />
     <Compile Include="ByteStats.cs" />
     <Compile Include="MainWindow.xaml.cs">
