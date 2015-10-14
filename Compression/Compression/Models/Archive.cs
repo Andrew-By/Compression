@@ -12,9 +12,10 @@ namespace Compression.Models
     [Serializable]
     public class Archive
     {
-        public Archive(Dictionary<byte, string> codes, byte[] data)
+        public Archive(Dictionary<byte, string> codes, uint bytesCount, byte[] data)
         {
             Codes = (from c in codes select new ByteCode(c.Key, c.Value)).ToArray();
+            BytesCount = bytesCount;
             Data = data;
         }
 
@@ -25,6 +26,7 @@ namespace Compression.Models
             for (int i = 0; i < codesLength; i++)
                 codes.Add(new ByteCode(reader));
             Codes = codes.ToArray();
+            BytesCount = reader.ReadUInt32();
 
             const int bufferSize = 4096;
             using (var ms = new MemoryStream())
@@ -38,6 +40,7 @@ namespace Compression.Models
 
         }
         public ByteCode[] Codes { get; }
+        public UInt32 BytesCount { get; }
         public byte[] Data { get; }
 
         public byte[] GetBytes()
@@ -49,6 +52,7 @@ namespace Compression.Models
                     writer.Write((byte)Codes.Length);
                     foreach (var c in Codes)
                         writer.Write(c.GetBytes());
+                    writer.Write(BytesCount);
                     writer.Write(Data);
                 }
                 return stream.ToArray();

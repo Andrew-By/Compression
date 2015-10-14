@@ -125,6 +125,11 @@ namespace Compression
             get { return _byte.ToString("X2"); }
         }
 
+        public string UTF8
+        {
+            get { return Encoding.UTF8.GetString(new[] { _byte }); }
+        }
+
         private int _count;
         public int Count
         {

@@ -62,7 +62,7 @@ namespace Compression
         private void ReadFileButton_Click(object sender, RoutedEventArgs e)
         {
             Arc.ReadFromFile(FilePathTextBox.Text);
-            Arc.Decompress();
+            FileContentsTextBox.Text = Arc.Decompress();
         }
     }
 }

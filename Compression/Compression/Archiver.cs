@@ -44,18 +44,31 @@ namespace Compression
             {
                 using (BitStream stream = new BitStream(mStream))
                 {
+                    StringBuilder buffer = new StringBuilder();
                     foreach (var b in _rawData)
                     {
                         var code = codes[b];
-                        stream.WriteBits(BitConverter.GetBytes(Convert.ToUInt32(code, 2)), 0, (ulong)code.Length);
+                        buffer.Append(code);
+                        //stream.WriteBits(BitConverter.GetBytes(Convert.ToUInt32(code, 2)), 0, (ulong)code.Length);
                     }
-                    _archive = new Archive(codes, mStream.ToArray());
+                    string sBuffer = buffer.ToString();
+                    int bytesLength = (sBuffer.Length % 8 == 0) ? sBuffer.Length / 8 : sBuffer.Length / 8 + 1;
+
+                    for (int i = 0; i < bytesLength * 8; i += 8)
+                    {
+                        string cache = (sBuffer.Length >= i + 8) ? sBuffer.Substring(i, 8) : sBuffer.Substring(i);
+                        if (cache.Length < 8)
+                            cache = cache.PadRight(8, '0');
+                        mStream.WriteByte(Convert.ToByte(cache, 2));
+                    }
+                    _archive = new Archive(codes, (uint)_rawData.Count(), mStream.ToArray());
                 }
             }
         }
 
-        public void Decompress()
+        public string Decompress()
         {
+            List<byte> raw = new List<byte>();
             TreeNode root = new TreeNode();
             foreach (var code in _archive.Codes)
             {
@@ -81,18 +94,51 @@ namespace Compression
                 n.Byte = code.Byte;
             }
 
-            //using (MemoryStream stream = new MemoryStream())
-            //{
-            //    using (BitStream bStream = new BitStream(stream))
-            //    {
-            //        List<bool> buffer = new List<bool>();
-            //        for (int i = 1; i < bStream.Length; i++)
-            //        {
-            //            byte b;
-            //            bStream.ReadBits(out b, i);
-            //        }
-            //    }
-            //}
+            using (MemoryStream stream = new MemoryStream(_archive.Data))
+            {
+
+                TreeNode n = root;
+                string buffer = string.Empty;
+                for (int i = 0; i < stream.Length; i++)
+                {
+                    buffer = Convert.ToString(stream.ReadByte(), 2);
+                    if (buffer.Length < 8)
+                    {
+                        buffer = buffer.PadLeft(8, '0');
+                    }
+                    foreach (var b in buffer)
+                    {
+                        if (raw.Count() < _archive.BytesCount)
+                        {
+
+                            if (b == '0')
+                            {
+                                if (n.Get0 != null)
+                                    n = n.Get0;
+                                else
+                                    throw new Exception("Символ не найден!");
+                            }
+                            else
+                            {
+                                if (n.Get1 != null)
+                                    n = n.Get1;
+                                else
+                                    throw new Exception("Символ не найден!");
+                            }
+
+                            if (n.Byte != 0)
+                            {
+                                raw.Add(n.Byte);
+                                n = root;
+                            }
+                        }
+                        else
+                            break;
+                    }
+                }
+            }
+
+            return Encoding.UTF8.GetString(raw.ToArray());
         }
 
         public void WriteToFile(string fileName)
