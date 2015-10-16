@@ -122,7 +122,8 @@ namespace Compression
                                     throw new Exception("Символ не найден!");
                             }
 
-                            if (n.Byte != 0)
+                            //if (n.Byte != 0)
+                            if(n.Get0==null && n.Get1==null)
                             {
                                 raw.Add(n.Byte);
                                 n = root;
